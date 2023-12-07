@@ -680,6 +680,8 @@ RID PhysicsServer3D::shape_create(ShapeType p_shape) {
 			return concave_polygon_shape_create();
 		case SHAPE_HEIGHTMAP:
 			return heightmap_shape_create();
+		case SHAPE_HEIGHTMAP_EX:
+			return heightmap_ex_shape_create();
 		case SHAPE_CUSTOM:
 			return custom_shape_create();
 		default:
@@ -699,6 +701,7 @@ void PhysicsServer3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("convex_polygon_shape_create"), &PhysicsServer3D::convex_polygon_shape_create);
 	ClassDB::bind_method(D_METHOD("concave_polygon_shape_create"), &PhysicsServer3D::concave_polygon_shape_create);
 	ClassDB::bind_method(D_METHOD("heightmap_shape_create"), &PhysicsServer3D::heightmap_shape_create);
+	ClassDB::bind_method(D_METHOD("heightmap_ex_shape_create"), &PhysicsServer3D::heightmap_ex_shape_create);
 	ClassDB::bind_method(D_METHOD("custom_shape_create"), &PhysicsServer3D::custom_shape_create);
 
 	ClassDB::bind_method(D_METHOD("shape_set_data", "shape", "data"), &PhysicsServer3D::shape_set_data);
@@ -977,6 +980,7 @@ void PhysicsServer3D::_bind_methods() {
 	BIND_ENUM_CONSTANT(SHAPE_CONVEX_POLYGON);
 	BIND_ENUM_CONSTANT(SHAPE_CONCAVE_POLYGON);
 	BIND_ENUM_CONSTANT(SHAPE_HEIGHTMAP);
+	BIND_ENUM_CONSTANT(SHAPE_HEIGHTMAP_EX);
 	BIND_ENUM_CONSTANT(SHAPE_SOFT_BODY);
 	BIND_ENUM_CONSTANT(SHAPE_CUSTOM);
 

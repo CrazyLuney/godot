@@ -85,6 +85,7 @@ public:
 	FUNCRID(convex_polygon_shape)
 	FUNCRID(concave_polygon_shape)
 	FUNCRID(heightmap_shape)
+	FUNCRID(heightmap_ex_shape)
 	FUNCRID(custom_shape)
 
 	FUNC2(shape_set_data, RID, const Variant &);

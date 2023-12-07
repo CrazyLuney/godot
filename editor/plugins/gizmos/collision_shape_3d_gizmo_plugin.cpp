@@ -42,6 +42,7 @@
 #include "scene/resources/concave_polygon_shape_3d.h"
 #include "scene/resources/convex_polygon_shape_3d.h"
 #include "scene/resources/cylinder_shape_3d.h"
+#include "scene/resources/height_map_ex_shape_3d.h"
 #include "scene/resources/height_map_shape_3d.h"
 #include "scene/resources/separation_ray_shape_3d.h"
 #include "scene/resources/sphere_shape_3d.h"
@@ -616,6 +617,13 @@ void CollisionShape3DGizmoPlugin::redraw(EditorNode3DGizmo *p_gizmo) {
 
 	if (Object::cast_to<HeightMapShape3D>(*s)) {
 		Ref<HeightMapShape3D> hms = s;
+
+		Ref<ArrayMesh> mesh = hms->get_debug_mesh();
+		p_gizmo->add_mesh(mesh, material);
+	}
+
+	if (Object::cast_to<HeightMapExShape3D>(*s)) {
+		Ref<HeightMapExShape3D> hms = s;
 
 		Ref<ArrayMesh> mesh = hms->get_debug_mesh();
 		p_gizmo->add_mesh(mesh, material);
