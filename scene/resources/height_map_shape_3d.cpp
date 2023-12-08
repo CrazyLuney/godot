@@ -175,7 +175,7 @@ void HeightMapShape3D::set_map_data(Vector<real_t> p_new) {
 	emit_changed();
 }
 
-Vector<real_t> HeightMapShape3D::get_map_data() const {
+const Vector<real_t> &HeightMapShape3D::get_map_data() const {
 	return map_data;
 }
 
