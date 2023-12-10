@@ -677,7 +677,7 @@ Point2i DisplayServerWindows::screen_get_position(int p_screen) const {
 typedef struct {
 	int count;
 	int screen;
-	Size2 size;
+	Size2i size;
 } EnumSizeData;
 
 typedef struct {
@@ -707,7 +707,7 @@ Size2i DisplayServerWindows::screen_get_size(int p_screen) const {
 	_THREAD_SAFE_METHOD_
 
 	p_screen = _get_screen_index(p_screen);
-	EnumSizeData data = { 0, p_screen, Size2() };
+	EnumSizeData data = { 0, p_screen, {} };
 	EnumDisplayMonitors(nullptr, nullptr, _MonitorEnumProcSize, (LPARAM)&data);
 	return data.size;
 }
@@ -1325,8 +1325,8 @@ void DisplayServerWindows::window_set_current_screen(int p_screen, WindowID p_wi
 	}
 	const WindowData &wd = windows[p_window];
 	if (wd.fullscreen) {
-		Point2 pos = screen_get_position(p_screen) + _get_screens_origin();
-		Size2 size = screen_get_size(p_screen);
+		const Point2i pos = screen_get_position(p_screen) + _get_screens_origin();
+		const Size2i size = screen_get_size(p_screen);
 
 		MoveWindow(wd.hWnd, pos.x, pos.y, size.width, size.height, TRUE);
 	} else {
@@ -1482,7 +1482,7 @@ void DisplayServerWindows::window_set_max_size(const Size2i p_size, WindowID p_w
 	ERR_FAIL_COND(!windows.has(p_window));
 	WindowData &wd = windows[p_window];
 
-	if ((p_size != Size2()) && ((p_size.x < wd.min_size.x) || (p_size.y < wd.min_size.y))) {
+	if ((p_size != Size2i()) && ((p_size.x < wd.min_size.x) || (p_size.y < wd.min_size.y))) {
 		ERR_PRINT("Maximum window size can't be smaller than minimum window size!");
 		return;
 	}
@@ -1503,7 +1503,7 @@ void DisplayServerWindows::window_set_min_size(const Size2i p_size, WindowID p_w
 	ERR_FAIL_COND(!windows.has(p_window));
 	WindowData &wd = windows[p_window];
 
-	if ((p_size != Size2()) && (wd.max_size != Size2()) && ((p_size.x > wd.max_size.x) || (p_size.y > wd.max_size.y))) {
+	if ((p_size != Size2i()) && (wd.max_size != Size2i()) && ((p_size.x > wd.max_size.x) || (p_size.y > wd.max_size.y))) {
 		ERR_PRINT("Minimum window size can't be larger than maximum window size!");
 		return;
 	}
@@ -1570,14 +1570,14 @@ Size2i DisplayServerWindows::window_get_size(WindowID p_window) const {
 
 	// GetClientRect() returns a zero rect for a minimized window, so we need to get the size in another way.
 	if (wd.minimized) {
-		return Size2(wd.width, wd.height);
+		return { wd.width, wd.height };
 	}
 
 	RECT r;
 	if (GetClientRect(wd.hWnd, &r)) { // Retrieves area inside of window border, including decoration.
-		return Size2(r.right - r.left, r.bottom - r.top);
+		return { r.right - r.left, r.bottom - r.top };
 	}
-	return Size2();
+	return {};
 }
 
 Size2i DisplayServerWindows::window_get_size_with_decorations(WindowID p_window) const {
@@ -1588,9 +1588,9 @@ Size2i DisplayServerWindows::window_get_size_with_decorations(WindowID p_window)
 
 	RECT r;
 	if (GetWindowRect(wd.hWnd, &r)) { // Retrieves area inside of window border, including decoration.
-		return Size2(r.right - r.left, r.bottom - r.top);
+		return { r.right - r.left, r.bottom - r.top };
 	}
-	return Size2();
+	return {};
 }
 
 void DisplayServerWindows::_get_window_style(bool p_main_window, bool p_fullscreen, bool p_multiwindow_fs, bool p_borderless, bool p_resizable, bool p_maximized, bool p_no_activate_focus, DWORD &r_style, DWORD &r_style_ex) {
@@ -1730,9 +1730,9 @@ void DisplayServerWindows::window_set_mode(WindowMode p_mode, WindowID p_window)
 			GetWindowRect(wd.hWnd, &wd.pre_fs_rect);
 		}
 
-		int cs = window_get_current_screen(p_window);
-		Point2 pos = screen_get_position(cs) + _get_screens_origin();
-		Size2 size = screen_get_size(cs);
+		const int cs = window_get_current_screen(p_window);
+		const Point2i pos = screen_get_position(cs) + _get_screens_origin();
+		const Size2i size = screen_get_size(cs);
 
 		wd.fullscreen = true;
 		wd.maximized = false;
@@ -2083,7 +2083,7 @@ void DisplayServerWindows::cursor_set_custom_image(const Ref<Resource> &p_cursor
 		RBMap<CursorShape, Vector<Variant>>::Element *cursor_c = cursors_cache.find(p_shape);
 
 		if (cursor_c) {
-			if (cursor_c->get()[0] == p_cursor && cursor_c->get()[1] == p_hotspot) {
+			if (static_cast<Ref<Resource>>(cursor_c->get()[0]) == p_cursor && cursor_c->get()[1] == p_hotspot) {
 				cursor_set_shape(p_shape);
 				return;
 			}
@@ -2094,8 +2094,8 @@ void DisplayServerWindows::cursor_set_custom_image(const Ref<Resource> &p_cursor
 		Ref<Texture2D> texture = p_cursor;
 		ERR_FAIL_COND(!texture.is_valid());
 		Ref<AtlasTexture> atlas_texture = p_cursor;
-		Size2 texture_size;
-		Rect2 atlas_rect;
+		Size2i texture_size;
+		Rect2i atlas_rect;
 
 		if (atlas_texture.is_valid()) {
 			texture = atlas_texture->get_atlas();
@@ -3020,14 +3020,14 @@ LRESULT DisplayServerWindows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		case WM_GETMINMAXINFO: {
 			if (windows[window_id].resizable && !windows[window_id].fullscreen) {
 				// Size of window decorations.
-				Size2 decor = window_get_size_with_decorations(window_id) - window_get_size(window_id);
+				const Size2i decor = window_get_size_with_decorations(window_id) - window_get_size(window_id);
 
 				MINMAXINFO *min_max_info = (MINMAXINFO *)lParam;
-				if (windows[window_id].min_size != Size2()) {
+				if (windows[window_id].min_size != Size2i()) {
 					min_max_info->ptMinTrackSize.x = windows[window_id].min_size.x + decor.x;
 					min_max_info->ptMinTrackSize.y = windows[window_id].min_size.y + decor.y;
 				}
-				if (windows[window_id].max_size != Size2()) {
+				if (windows[window_id].max_size != Size2i()) {
 					min_max_info->ptMaxTrackSize.x = windows[window_id].max_size.x + decor.x;
 					min_max_info->ptMaxTrackSize.y = windows[window_id].max_size.y + decor.y;
 				}

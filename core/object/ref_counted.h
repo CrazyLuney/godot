@@ -87,14 +87,24 @@ public:
 		return reference != p_ptr;
 	}
 
-	_FORCE_INLINE_ bool operator<(const Ref<T> &p_r) const {
-		return reference < p_r.reference;
+	_FORCE_INLINE_ bool operator<(const Variant& p_r) const noexcept {
+		return reference < static_cast<Object *>(p_r);
 	}
-	_FORCE_INLINE_ bool operator==(const Ref<T> &p_r) const {
-		return reference == p_r.reference;
+	_FORCE_INLINE_ bool operator==(const Variant &p_r) const noexcept {
+		return reference == static_cast<Object *>(p_r);
 	}
-	_FORCE_INLINE_ bool operator!=(const Ref<T> &p_r) const {
-		return reference != p_r.reference;
+	_FORCE_INLINE_ bool operator!=(const Variant &p_r) const noexcept {
+		return reference != static_cast<Object *>(p_r);
+	}
+
+	friend _FORCE_INLINE_ bool operator<(const Variant &p_l, const Ref<T> &p_r) noexcept {
+		return static_cast<Object *>(p_l) < p_r.reference;
+	}
+	friend _FORCE_INLINE_ bool operator==(const Variant &p_l, const Ref<T> &p_r) noexcept {
+		return static_cast<Object *>(p_l) == p_r.reference;
+	}
+	friend _FORCE_INLINE_ bool operator!=(const Variant &p_l, const Ref<T> &p_r) noexcept {
+		return static_cast<Object *>(p_l) != p_r.reference;
 	}
 
 	_FORCE_INLINE_ T *operator*() const {
@@ -222,6 +232,19 @@ public:
 		unref();
 	}
 };
+
+template <class X, class Y>
+_FORCE_INLINE_ bool operator<(const Ref<X> &p_l, const Ref<Y> &p_r) noexcept {
+	return p_l.ptr() < p_r.ptr();
+}
+template <class X, class Y>
+_FORCE_INLINE_ bool operator==(const Ref<X> &p_l, const Ref<Y> &p_r) noexcept {
+	return p_l.ptr() == p_r.ptr();
+}
+template <class X, class Y>
+_FORCE_INLINE_ bool operator!=(const Ref<X> &p_l, const Ref<Y> &p_r) noexcept {
+	return p_l.ptr() != p_r.ptr();
+}
 
 class WeakRef : public RefCounted {
 	GDCLASS(WeakRef, RefCounted);

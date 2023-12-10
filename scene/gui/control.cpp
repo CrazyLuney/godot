@@ -1009,10 +1009,10 @@ int Control::_get_anchors_layout_preset() const {
 
 	// Check anchors to determine if the current state matches a preset, or not.
 
-	float left = get_anchor(SIDE_LEFT);
-	float right = get_anchor(SIDE_RIGHT);
-	float top = get_anchor(SIDE_TOP);
-	float bottom = get_anchor(SIDE_BOTTOM);
+	const real_t left = get_anchor(SIDE_LEFT);
+	const real_t right = get_anchor(SIDE_RIGHT);
+	const real_t top = get_anchor(SIDE_TOP);
+	const real_t bottom = get_anchor(SIDE_BOTTOM);
 
 	if (left == ANCHOR_BEGIN && right == ANCHOR_BEGIN && top == ANCHOR_BEGIN && bottom == ANCHOR_BEGIN) {
 		return (int)LayoutPreset::PRESET_TOP_LEFT;

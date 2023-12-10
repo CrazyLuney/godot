@@ -183,6 +183,8 @@ opts.Add(BoolVariable("separate_debug_symbols", "Extract debugging symbols to a 
 opts.Add(EnumVariable("lto", "Link-time optimization (production builds)", "none", ("none", "auto", "thin", "full")))
 opts.Add(BoolVariable("production", "Set defaults to build Godot for use in production", False))
 
+opts.Add(EnumVariable("cxx_std", "C++ standard version", "20", ("17", "20")))
+
 # Components
 opts.Add(BoolVariable("deprecated", "Enable compatibility code for deprecated and removed features", True))
 opts.Add(EnumVariable("precision", "Set the floating-point precision level", "single", ("single", "double")))
@@ -571,7 +573,7 @@ if selected_platform in platform_list:
     # are actually handled to change compile options, etc.
     detect.configure(env)
 
-    print(f'Building for platform "{selected_platform}", architecture "{env["arch"]}", target "{env["target"]}".')
+    print(f'Building for platform "{selected_platform}", architecture "{env["arch"]}", target "{env["target"]}", C++{env["cxx_std"]}.')
     if env.dev_build:
         print("NOTE: Developer build, with debug optimization level and debug symbols (unless overridden).")
 
@@ -636,11 +638,10 @@ if selected_platform in platform_list:
         # Specifying GNU extensions support explicitly, which are supported by
         # both GCC and Clang. Both currently default to gnu11 and gnu++14.
         env.Prepend(CFLAGS=["-std=gnu11"])
-        env.Prepend(CXXFLAGS=["-std=gnu++17"])
+        env.Prepend(CXXFLAGS=[f'-std=gnu++{env["cxx_std"]}'])
     else:
-        # MSVC doesn't have clear C standard support, /std only covers C++.
-        # We apply it to CCFLAGS (both C and C++ code) in case it impacts C features.
-        env.Prepend(CCFLAGS=["/std:c++17"])
+        env.Prepend(CFLAGS=["/std:c11"])
+        env.Prepend(CXXFLAGS=[f'/std:c++{env["cxx_std"]}'])
 
     # Enforce our minimal compiler version requirements
     cc_version = methods.get_compiler_version(env) or {

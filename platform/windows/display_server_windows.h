@@ -401,12 +401,12 @@ class DisplayServerWindows : public DisplayServer {
 		Vector2 last_tilt;
 		bool last_pen_inverted = false;
 
-		Size2 min_size;
-		Size2 max_size;
+		Size2i min_size;
+		Size2i max_size;
 		int width = 0, height = 0;
 
-		Size2 window_rect;
-		Point2 last_pos;
+		Size2i window_rect;
+		Point2i last_pos;
 
 		ObjectID instance_id;
 

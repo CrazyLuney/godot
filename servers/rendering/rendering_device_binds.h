@@ -406,7 +406,7 @@ protected:
 		TypedArray<StringName> vnames = get_version_list();
 		Dictionary ret;
 		for (int i = 0; i < vnames.size(); i++) {
-			ret[vnames[i]] = versions[vnames[i]];
+			ret[vnames[i]] = static_cast<Variant>(versions[vnames[i]]);
 		}
 		return ret;
 	}
