@@ -1,0 +1,4 @@
+[submodule "enroth"]
+	path = modules/enroth/enroth
+	url = https://github.com/CrazyLuney/BetterOpenEnroth.git
+	branch = godot

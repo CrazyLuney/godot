@@ -1,0 +1,32 @@
+def build_types(env, target, source):
+    print("<<< building types >>>")
+
+Import("env")
+Import("env_modules")
+
+# library
+library_obj = []
+
+env_enroth_library = env_modules.Clone()
+
+env_enroth_library.Command("enroth-types", None, build_types)
+env_enroth_library.Append(CPPPATH=["#thirparty/zlib"])
+env_enroth_library.Append(CPPPATH=["enroth/src"])
+env_enroth_library.add_source_files(library_obj, Glob("enroth/src/AssetTools/*.cpp"))
+env_enroth_library.add_source_files(library_obj, Glob("enroth/src/IO/*.cpp"))
+env_enroth_library.add_source_files(library_obj, Glob("enroth/src/Types/*.cpp"))
+env_enroth_library.add_source_files(library_obj, Glob("enroth/src/Utility/*.cpp"))
+env_enroth_library.Depends(library_obj, "enroth-types")
+
+env.modules_sources += library_obj
+
+# module
+module_obj = []
+
+env_enroth_module = env_modules.Clone()
+
+env_enroth_module.add_source_files(module_obj, "register_types.cpp")
+
+env.modules_sources += module_obj
+
+env.Depends(module_obj, library_obj)
