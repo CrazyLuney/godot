@@ -1,5 +1,22 @@
-def build_types(env, target, source):
-    print("<<< building types >>>")
+import os
+
+def generate_types(env, library_dir = 'enroth'):
+    module_dir_path = Dir(".").abspath
+    library_dir_path = os.path.join(module_dir_path, library_dir)
+
+    print("enroth-generate-types: configure...")
+
+    if env.Execute("cmake -B build -S . -DGODOT=ON", chdir=library_dir_path):
+        print("enroth-generate-types: cmake config failed")
+        return
+    
+    print("enroth-generate-types: run...")
+
+    if env.Execute("cmake --build build --target DBGenerateTypes --config release", chdir=library_dir_path):
+        print("enroth-generate-types: cmake build failed")
+        return
+    
+    print("enroth-generate-types: done")
 
 Import("env")
 Import("env_modules")
@@ -9,14 +26,14 @@ library_obj = []
 
 env_enroth_library = env_modules.Clone()
 
-env_enroth_library.Command("enroth-types", None, build_types)
+generate_types(env_enroth_library)
+
 env_enroth_library.Append(CPPPATH=["#thirparty/zlib"])
 env_enroth_library.Append(CPPPATH=["enroth/src"])
 env_enroth_library.add_source_files(library_obj, Glob("enroth/src/AssetTools/*.cpp"))
 env_enroth_library.add_source_files(library_obj, Glob("enroth/src/IO/*.cpp"))
 env_enroth_library.add_source_files(library_obj, Glob("enroth/src/Types/*.cpp"))
 env_enroth_library.add_source_files(library_obj, Glob("enroth/src/Utility/*.cpp"))
-env_enroth_library.Depends(library_obj, "enroth-types")
 
 env.modules_sources += library_obj
 
