@@ -32,12 +32,15 @@
 
 #include "godot_body_direct_state_3d.h"
 #include "godot_broad_phase_3d_bvh.h"
-#include "godot_height_map_ex_shape_3d.h"
 #include "joints/godot_cone_twist_joint_3d.h"
 #include "joints/godot_generic_6dof_joint_3d.h"
 #include "joints/godot_hinge_joint_3d.h"
 #include "joints/godot_pin_joint_3d.h"
 #include "joints/godot_slider_joint_3d.h"
+
+#ifdef MODULE_ENROTH_ENABLED
+#include "modules/enroth/godot_height_map_ex_shape_3d.h"
+#endif
 
 #include "core/debugger/engine_debugger.h"
 #include "core/os/os.h"
@@ -100,16 +103,18 @@ RID GodotPhysicsServer3D::heightmap_shape_create() {
 	return rid;
 }
 
+RID GodotPhysicsServer3D::custom_shape_create() {
+	ERR_FAIL_V(RID());
+}
+
+#ifdef MODULE_ENROTH_ENABLED
 RID GodotPhysicsServer3D::heightmap_ex_shape_create() {
 	GodotShape3D *shape = memnew(GodotHeightMapExShape3D);
 	RID rid = shape_owner.make_rid(shape);
 	shape->set_self(rid);
 	return rid;
 }
-
-RID GodotPhysicsServer3D::custom_shape_create() {
-	ERR_FAIL_V(RID());
-}
+#endif
 
 void GodotPhysicsServer3D::shape_set_data(RID p_shape, const Variant &p_data) {
 	GodotShape3D *shape = shape_owner.get_or_null(p_shape);

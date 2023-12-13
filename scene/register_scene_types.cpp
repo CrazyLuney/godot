@@ -164,7 +164,6 @@
 #include "scene/resources/font.h"
 #include "scene/resources/gradient.h"
 #include "scene/resources/gradient_texture.h"
-#include "scene/resources/height_map_ex_shape_3d.h"
 #include "scene/resources/height_map_shape_3d.h"
 #include "scene/resources/image_texture.h"
 #include "scene/resources/immediate_mesh.h"
@@ -279,6 +278,10 @@
 #include "scene/resources/importer_mesh.h"
 #include "scene/resources/mesh_library.h"
 #endif // _3D_DISABLED
+
+#ifdef MODULE_ENROTH_ENABLED
+#include "modules/enroth/height_map_ex_shape_3d.h"
+#endif
 
 static Ref<ResourceFormatSaverText> resource_saver_text;
 static Ref<ResourceFormatLoaderText> resource_loader_text;
@@ -846,7 +849,6 @@ void register_scene_types() {
 	GDREGISTER_CLASS(BoxShape3D);
 	GDREGISTER_CLASS(CapsuleShape3D);
 	GDREGISTER_CLASS(CylinderShape3D);
-	GDREGISTER_CLASS(HeightMapExShape3D);
 	GDREGISTER_CLASS(HeightMapShape3D);
 	GDREGISTER_CLASS(WorldBoundaryShape3D);
 	GDREGISTER_CLASS(ConvexPolygonShape3D);
@@ -1041,7 +1043,6 @@ void register_scene_types() {
 	ClassDB::add_compatibility_class("GIProbe", "VoxelGI");
 	ClassDB::add_compatibility_class("GIProbeData", "VoxelGIData");
 	ClassDB::add_compatibility_class("GradientTexture", "GradientTexture1D");
-	ClassDB::add_compatibility_class("HeightMapExShape", "HeightMapExShape3D");
 	ClassDB::add_compatibility_class("HeightMapShape", "HeightMapShape3D");
 	ClassDB::add_compatibility_class("HingeJoint", "HingeJoint3D");
 	ClassDB::add_compatibility_class("Joint", "Joint3D");

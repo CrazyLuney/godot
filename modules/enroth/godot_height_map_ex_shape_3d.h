@@ -31,7 +31,7 @@
 #ifndef GODOT_HEIGHT_MAP_EX_SHAPE_3D_H
 #define GODOT_HEIGHT_MAP_EX_SHAPE_3D_H
 
-#include "godot_shape_3d.h"
+#include "servers/physics_3d/godot_shape_3d.h"
 
 struct GodotHeightMapExShape3D : public GodotConcaveShape3D {
 	Vector<real_t> heights;

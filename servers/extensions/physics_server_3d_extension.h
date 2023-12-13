@@ -216,8 +216,11 @@ public:
 	EXBIND0R(RID, convex_polygon_shape_create)
 	EXBIND0R(RID, concave_polygon_shape_create)
 	EXBIND0R(RID, heightmap_shape_create)
-	EXBIND0R(RID, heightmap_ex_shape_create)
 	EXBIND0R(RID, custom_shape_create)
+
+#ifdef MODULE_ENROTH_ENABLED
+	EXBIND0R(RID, heightmap_ex_shape_create)
+#endif
 
 	EXBIND2(shape_set_data, RID, const Variant &)
 	EXBIND2(shape_set_custom_solver_bias, RID, real_t)

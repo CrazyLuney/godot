@@ -1527,7 +1527,6 @@ const char *RenamesMap3To4::class_renames[][2] = {
 	{ "Generic6DOFJoint", "Generic6DOFJoint3D" },
 	{ "GeometryInstance", "GeometryInstance3D" },
 	{ "GradientTexture", "GradientTexture2D" },
-	{ "HeightMapExShape", "HeightMapExShape3D" },
 	{ "HeightMapShape", "HeightMapShape3D" },
 	{ "HingeJoint", "HingeJoint3D" },
 	{ "IP_Unix", "IPUnix" },

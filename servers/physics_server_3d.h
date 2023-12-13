@@ -36,6 +36,8 @@
 #include "core/object/gdvirtual.gen.inc"
 #include "core/variant/native_ptr.h"
 
+#include "modules/modules_enabled.gen.h"
+
 class PhysicsDirectSpaceState3D;
 template <typename T>
 class TypedArray;
@@ -251,9 +253,12 @@ public:
 		SHAPE_CONVEX_POLYGON, ///< array of planes:"planes"
 		SHAPE_CONCAVE_POLYGON, ///< vector3 array:"triangles" , or Dictionary with "indices" (int array) and "triangles" (Vector3 array)
 		SHAPE_HEIGHTMAP, ///< dict( int:"width", int:"depth",float:"cell_size", float_array:"heights"
-		SHAPE_HEIGHTMAP_EX, ///< dict( int:"width", int:"depth",float:"cell_size", float_array:"heights"
 		SHAPE_SOFT_BODY, ///< Used internally, can't be created from the physics server.
 		SHAPE_CUSTOM, ///< Server-Implementation based custom shape, calling shape_create() with this value will result in an error
+
+#ifdef MODULE_ENROTH_ENABLED
+		SHAPE_HEIGHTMAP_EX, ///< dict( int:"width", int:"depth",float:"cell_size", float_array:"heights"
+#endif
 	};
 
 	RID shape_create(ShapeType p_shape);
@@ -267,8 +272,11 @@ public:
 	virtual RID convex_polygon_shape_create() = 0;
 	virtual RID concave_polygon_shape_create() = 0;
 	virtual RID heightmap_shape_create() = 0;
-	virtual RID heightmap_ex_shape_create() = 0;
 	virtual RID custom_shape_create() = 0;
+
+#ifdef MODULE_ENROTH_ENABLED
+	virtual RID heightmap_ex_shape_create() = 0;
+#endif
 
 	virtual void shape_set_data(RID p_shape, const Variant &p_data) = 0;
 	virtual void shape_set_custom_solver_bias(RID p_shape, real_t p_bias) = 0;

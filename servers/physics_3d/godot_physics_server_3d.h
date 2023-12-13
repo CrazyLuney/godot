@@ -88,8 +88,11 @@ public:
 	virtual RID convex_polygon_shape_create() override;
 	virtual RID concave_polygon_shape_create() override;
 	virtual RID heightmap_shape_create() override;
-	virtual RID heightmap_ex_shape_create() override;
 	virtual RID custom_shape_create() override;
+
+#ifdef MODULE_ENROTH_ENABLED
+	virtual RID heightmap_ex_shape_create() override;
+#endif
 
 	virtual void shape_set_data(RID p_shape, const Variant &p_data) override;
 	virtual void shape_set_custom_solver_bias(RID p_shape, real_t p_bias) override;

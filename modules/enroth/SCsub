@@ -1,18 +1,22 @@
-import os
+from os import path
 
-def generate_types(env, library_dir = 'enroth'):
-    module_dir_path = Dir(".").abspath
-    library_dir_path = os.path.join(module_dir_path, library_dir)
+LIBRARY_DIR = "enroth"
+LIBRARY_SRC_DIR = path.join(LIBRARY_DIR, "src")
+LIBRARY_LIB_DIRS = ["AssetTools", "IO", "Types", "Utility"]
 
+# TODO: builtin zlib ?
+ZLIB_DIR = path.join("#thirdparty", "zlib")
+
+def generate_types(env, library_dir = LIBRARY_DIR):
     print("enroth-generate-types: configure...")
 
-    if env.Execute("cmake -B build -S . -DGODOT=ON", chdir=library_dir_path):
+    if env.Execute("cmake -B build -S . -DGODOT=ON", chdir=library_dir):
         print("enroth-generate-types: cmake config failed")
         return
     
     print("enroth-generate-types: run...")
 
-    if env.Execute("cmake --build build --target DBGenerateTypes --config release", chdir=library_dir_path):
+    if env.Execute("cmake --build build --target DBGenerateTypes --config release", chdir=library_dir):
         print("enroth-generate-types: cmake build failed")
         return
     
@@ -28,12 +32,10 @@ env_enroth_library = env_modules.Clone()
 
 generate_types(env_enroth_library)
 
-env_enroth_library.Append(CPPPATH=["#thirparty/zlib"])
-env_enroth_library.Append(CPPPATH=["enroth/src"])
-env_enroth_library.add_source_files(library_obj, Glob("enroth/src/AssetTools/*.cpp"))
-env_enroth_library.add_source_files(library_obj, Glob("enroth/src/IO/*.cpp"))
-env_enroth_library.add_source_files(library_obj, Glob("enroth/src/Types/*.cpp"))
-env_enroth_library.add_source_files(library_obj, Glob("enroth/src/Utility/*.cpp"))
+env_enroth_library.Append(CPPPATH=[ZLIB_DIR, LIBRARY_SRC_DIR])
+
+for dir in LIBRARY_LIB_DIRS:    
+    env_enroth_library.add_source_files(library_obj, Glob(path.join(LIBRARY_SRC_DIR, dir, "*.cpp")))
 
 env.modules_sources += library_obj
 
@@ -42,7 +44,7 @@ module_obj = []
 
 env_enroth_module = env_modules.Clone()
 
-env_enroth_module.add_source_files(module_obj, "register_types.cpp")
+env_enroth_module.add_source_files(module_obj, "*.cpp")
 
 env.modules_sources += module_obj
 

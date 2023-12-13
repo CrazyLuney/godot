@@ -453,7 +453,7 @@ void GodotHeightMapExShape3D::_build_accelerator() {
 		++bounds_grid_depth;
 	}
 
-	const auto bound_grid_size = bounds_grid_width * bounds_grid_depth;
+	const int bound_grid_size = bounds_grid_width * bounds_grid_depth;
 
 	if (bound_grid_size < 2) {
 		// Grid is empty or just one chunk.
