@@ -1,22 +1,53 @@
 from os import path
 
-LIBRARY_DIR = "enroth"
-LIBRARY_SRC_DIR = path.join(LIBRARY_DIR, "src")
-LIBRARY_LIB_DIRS = ["AssetTools", "IO", "Types", "Utility"]
+class LibrarySourcesCollector:
+    SOURCE_SUFFIXES = [".cpp"]
+    HEADER_SUFFIXES = [".h", ".hpp"]
+
+    def __init__(self, root):
+        self.sources = []
+        self.headers = []
+        self.root = root
+        self.collect()
+
+    def collect_recursive(self, node):
+        from SCons import Node
+        from SCons.Script import Glob
+
+        for f in Glob(path.join(str(node), "*"), source=True):
+            if isinstance(f, Node.FS.Dir):
+                self.collect_recursive(f)
+            elif isinstance(f, Node.FS.File):
+                suffix = f.suffix.lower()
+                if suffix in self.SOURCE_SUFFIXES:
+                    self.sources.append(f)
+                elif suffix in self.HEADER_SUFFIXES:
+                    self.headers.append(f.path)
+
+    def collect(self):
+        from SCons import Node
+
+        if isinstance(self.root, (str, bytes)):
+            self.root = Dir(self.root)
+        self.collect_recursive(self.root)
+
+ENROTH_DIR = "enroth"
+ENROTH_SRC_DIR = path.join(ENROTH_DIR, "src")
+ENROTH_LIBS = ["AssetTools", "IO", "Types", "Utility"]
 
 # TODO: builtin zlib ?
 ZLIB_DIR = path.join("#thirdparty", "zlib")
 
-def generate_types(env, library_dir = LIBRARY_DIR):
+def generate_enroth_types(env, enroth_dir = ENROTH_DIR):
     print("enroth-generate-types: configure...")
 
-    if env.Execute("cmake -B build -S . -DGODOT=ON", chdir=library_dir):
+    if env.Execute("cmake -B build -S . -DGODOT=ON", chdir=enroth_dir):
         print("enroth-generate-types: cmake config failed")
         return
     
     print("enroth-generate-types: run...")
 
-    if env.Execute("cmake --build build --target DBGenerateTypes --config release", chdir=library_dir):
+    if env.Execute("cmake --build build --target DBGenerateTypes --config release", chdir=enroth_dir):
         print("enroth-generate-types: cmake build failed")
         return
     
@@ -26,18 +57,29 @@ Import("env")
 Import("env_modules")
 
 # library
-library_obj = []
+enroth_obj = []
+enroth_libs = []
 
 env_enroth_library = env_modules.Clone()
 
-generate_types(env_enroth_library)
+generate_enroth_types(env_enroth_library)
 
-env_enroth_library.Append(CPPPATH=[ZLIB_DIR, LIBRARY_SRC_DIR])
+env_enroth_library.Append(CPPPATH=[ZLIB_DIR, ENROTH_SRC_DIR])
+env_enroth_library.Append(CPPDEFINES=["GODOT_MODULE"])
 
-for dir in LIBRARY_LIB_DIRS:    
-    env_enroth_library.add_source_files(library_obj, Glob(path.join(LIBRARY_SRC_DIR, dir, "*.cpp")))
+if env.msvc:
+    env_enroth_library.Append(CPPDEFINES=["_CRT_SECURE_NO_WARNINGS"])
 
-env.modules_sources += library_obj
+for lib in ENROTH_LIBS:
+    collector = LibrarySourcesCollector(path.join(ENROTH_SRC_DIR, lib))
+
+    env_enroth_library.add_source_files(enroth_obj, collector.sources)
+
+    # hacky
+    if env["vsproj"]:
+        env.vs_incs += collector.headers
+
+env.modules_sources += enroth_obj
 
 # module
 module_obj = []
@@ -48,4 +90,5 @@ env_enroth_module.add_source_files(module_obj, "*.cpp")
 
 env.modules_sources += module_obj
 
-env.Depends(module_obj, library_obj)
+env.Depends(module_obj, enroth_obj)
+env.Depends(module_obj, enroth_libs)
