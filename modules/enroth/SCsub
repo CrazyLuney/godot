@@ -1,4 +1,11 @@
-from os import path
+import os
+
+ENROTH_DIR = "enroth"
+ENROTH_SRC_DIR = os.path.join(ENROTH_DIR, "src")
+ENROTH_LIBS = ["AssetTools", "IO", "Types", "Utility"]
+
+# TODO: builtin zlib ?
+ZLIB_DIR = os.path.join("#thirdparty", "zlib")
 
 class LibrarySourcesCollector:
     SOURCE_SUFFIXES = [".cpp"]
@@ -10,19 +17,25 @@ class LibrarySourcesCollector:
         self.root = root
         self.collect()
 
+    def collect_accept_dir(self, node):
+        self.collect_recursive(node)
+
+    def collect_accept_file(self, node):
+        suffix = node.suffix.lower()
+        if suffix in self.SOURCE_SUFFIXES:
+            self.sources.append(node)
+        elif suffix in self.HEADER_SUFFIXES:
+            self.headers.append(node)
+
     def collect_recursive(self, node):
         from SCons import Node
         from SCons.Script import Glob
 
-        for f in Glob(path.join(str(node), "*"), source=True):
+        for f in Glob(os.path.join(str(node), "*"), source=True):
             if isinstance(f, Node.FS.Dir):
-                self.collect_recursive(f)
+                self.collect_accept_dir(f)
             elif isinstance(f, Node.FS.File):
-                suffix = f.suffix.lower()
-                if suffix in self.SOURCE_SUFFIXES:
-                    self.sources.append(f)
-                elif suffix in self.HEADER_SUFFIXES:
-                    self.headers.append(f.path)
+                self.collect_accept_file(f)
 
     def collect(self):
         from SCons import Node
@@ -30,13 +43,6 @@ class LibrarySourcesCollector:
         if isinstance(self.root, (str, bytes)):
             self.root = Dir(self.root)
         self.collect_recursive(self.root)
-
-ENROTH_DIR = "enroth"
-ENROTH_SRC_DIR = path.join(ENROTH_DIR, "src")
-ENROTH_LIBS = ["AssetTools", "IO", "Types", "Utility"]
-
-# TODO: builtin zlib ?
-ZLIB_DIR = path.join("#thirdparty", "zlib")
 
 def generate_enroth_types(env, enroth_dir = ENROTH_DIR):
     print("enroth-generate-types: configure...")
@@ -57,7 +63,7 @@ Import("env")
 Import("env_modules")
 
 # library
-enroth_obj = []
+enroth_objs = []
 enroth_libs = []
 
 env_enroth_library = env_modules.Clone()
@@ -71,24 +77,24 @@ if env.msvc:
     env_enroth_library.Append(CPPDEFINES=["_CRT_SECURE_NO_WARNINGS"])
 
 for lib in ENROTH_LIBS:
-    collector = LibrarySourcesCollector(path.join(ENROTH_SRC_DIR, lib))
+    collector = LibrarySourcesCollector(os.path.join(ENROTH_SRC_DIR, lib))
 
-    env_enroth_library.add_source_files(enroth_obj, collector.sources)
+    env_enroth_library.add_source_files(enroth_objs, collector.sources)
 
     # hacky
     if env["vsproj"]:
-        env.vs_incs += collector.headers
+        env.vs_incs += [f.path for f in collector.headers]
 
-env.modules_sources += enroth_obj
+env.modules_sources += enroth_objs
 
 # module
-module_obj = []
+module_objs = []
 
 env_enroth_module = env_modules.Clone()
 
-env_enroth_module.add_source_files(module_obj, "*.cpp")
+env_enroth_module.add_source_files(module_objs, "*.cpp")
 
-env.modules_sources += module_obj
+env.modules_sources += module_objs
 
-env.Depends(module_obj, enroth_obj)
-env.Depends(module_obj, enroth_libs)
+env.Depends(module_objs, enroth_objs)
+env.Depends(module_objs, enroth_libs)
