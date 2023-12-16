@@ -220,11 +220,7 @@ void HeightMapExShape3D::_bind_methods() {
 HeightMapExShape3D::HeightMapExShape3D() :
 		Shape3D(PhysicsServer3D::get_singleton()->shape_create(PhysicsServer3D::SHAPE_HEIGHTMAP_EX)) {
 	map_data.resize(map_width * map_depth);
-	real_t *w = map_data.ptrw();
-	w[0] = 0.0;
-	w[1] = 0.0;
-	w[2] = 0.0;
-	w[3] = 0.0;
+	map_data.fill(0);
 
 	_update_shape();
 }

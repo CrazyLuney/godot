@@ -18,7 +18,7 @@ class LibrarySourcesCollector:
         self.collect()
 
     def collect_accept_dir(self, node):
-        self.collect_recursive(node)
+        self.collect_traverse(node, recursive=True)
 
     def collect_accept_file(self, node):
         suffix = node.suffix.lower()
@@ -27,22 +27,22 @@ class LibrarySourcesCollector:
         elif suffix in self.HEADER_SUFFIXES:
             self.headers.append(node)
 
-    def collect_recursive(self, node):
+    def collect_traverse(self, node, recursive=True):
         from SCons import Node
         from SCons.Script import Glob
 
         for f in Glob(os.path.join(str(node), "*"), source=True):
-            if isinstance(f, Node.FS.Dir):
+            if isinstance(f, Node.FS.Dir) and recursive:
                 self.collect_accept_dir(f)
             elif isinstance(f, Node.FS.File):
                 self.collect_accept_file(f)
 
-    def collect(self):
+    def collect(self, recursive=True):
         from SCons import Node
 
         if isinstance(self.root, (str, bytes)):
             self.root = Dir(self.root)
-        self.collect_recursive(self.root)
+        self.collect_traverse(self.root, recursive=recursive)
 
 def generate_enroth_types(env, enroth_dir = ENROTH_DIR):
     print("enroth-generate-types: configure...")
@@ -62,13 +62,15 @@ def generate_enroth_types(env, enroth_dir = ENROTH_DIR):
 Import("env")
 Import("env_modules")
 
+# types
+if env["enroth_generate_types"]:
+    generate_enroth_types(env)
+
 # library
 enroth_objs = []
 enroth_libs = []
 
 env_enroth_library = env_modules.Clone()
-
-generate_enroth_types(env_enroth_library)
 
 env_enroth_library.Append(CPPPATH=[ZLIB_DIR, ENROTH_SRC_DIR])
 env_enroth_library.Append(CPPDEFINES=["GODOT_MODULE"])
@@ -92,7 +94,12 @@ module_objs = []
 
 env_enroth_module = env_modules.Clone()
 
+env_enroth_module.Append(CPPPATH=[ENROTH_SRC_DIR])
+
 env_enroth_module.add_source_files(module_objs, "*.cpp")
+
+if env.editor_build:
+    env_enroth_module.add_source_files(module_objs, "editor/*.cpp")
 
 env.modules_sources += module_objs
 
