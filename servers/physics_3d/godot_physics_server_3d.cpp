@@ -39,7 +39,7 @@
 #include "joints/godot_slider_joint_3d.h"
 
 #ifdef MODULE_ENROTH_ENABLED
-#include "modules/enroth/godot_height_map_ex_shape_3d.h"
+#include "modules/enroth/enroth_physics_height_map_shape_3d.h"
 #endif
 
 #include "core/debugger/engine_debugger.h"
@@ -109,7 +109,7 @@ RID GodotPhysicsServer3D::custom_shape_create() {
 
 #ifdef MODULE_ENROTH_ENABLED
 RID GodotPhysicsServer3D::heightmap_ex_shape_create() {
-	GodotShape3D *shape = memnew(GodotHeightMapExShape3D);
+	GodotShape3D *shape = memnew(EnrothPhysicsHeightMapShape3D);
 	RID rid = shape_owner.make_rid(shape);
 	shape->set_self(rid);
 	return rid;

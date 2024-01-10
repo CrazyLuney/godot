@@ -48,7 +48,7 @@
 #include "scene/resources/world_boundary_shape_3d.h"
 
 #ifdef MODULE_ENROTH_ENABLED
-#include "modules/enroth/height_map_ex_shape_3d.h"
+#include "modules/enroth/enroth_height_map_shape_3d.h"
 #endif
 
 CollisionShape3DGizmoPlugin::CollisionShape3DGizmoPlugin() {
@@ -626,8 +626,8 @@ void CollisionShape3DGizmoPlugin::redraw(EditorNode3DGizmo *p_gizmo) {
 	}
 
 #ifdef MODULE_ENROTH_ENABLED
-	if (Object::cast_to<HeightMapExShape3D>(*s)) {
-		Ref<HeightMapExShape3D> hms = s;
+	if (Object::cast_to<EnrothHeightMapShape3D>(*s)) {
+		Ref<EnrothHeightMapShape3D> hms = s;
 
 		Ref<ArrayMesh> mesh = hms->get_debug_mesh();
 		p_gizmo->add_mesh(mesh, material);

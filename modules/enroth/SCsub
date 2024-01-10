@@ -89,6 +89,8 @@ for lib in ENROTH_LIBS:
 
 env.modules_sources += enroth_objs
 
+env.Append(CPPPATH=[Dir(ENROTH_SRC_DIR)])
+
 # module
 module_objs = []
 

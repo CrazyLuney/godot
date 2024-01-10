@@ -1,38 +1,8 @@
-/**************************************************************************/
-/*  godot_height_map_ex_shape_3d.cpp                                      */
-/**************************************************************************/
-/*                         This file is part of:                          */
-/*                             GODOT ENGINE                               */
-/*                        https://godotengine.org                         */
-/**************************************************************************/
-/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
-/*                                                                        */
-/* Permission is hereby granted, free of charge, to any person obtaining  */
-/* a copy of this software and associated documentation files (the        */
-/* "Software"), to deal in the Software without restriction, including    */
-/* without limitation the rights to use, copy, modify, merge, publish,    */
-/* distribute, sublicense, and/or sell copies of the Software, and to     */
-/* permit persons to whom the Software is furnished to do so, subject to  */
-/* the following conditions:                                              */
-/*                                                                        */
-/* The above copyright notice and this permission notice shall be         */
-/* included in all copies or substantial portions of the Software.        */
-/*                                                                        */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
-/**************************************************************************/
-
-#include "godot_height_map_ex_shape_3d.h"
+#include "enroth_physics_height_map_shape_3d.h"
 
 #include "core/io/image.h"
 
-// GodotHeightMapExShape3D is based on GodotHeightMapShape3D
+// EnrothPhysicsHeightMapShape3D is based on GodotHeightMapShape3D
 
 namespace {
 
@@ -44,7 +14,7 @@ struct _HeightmapSegmentCullParams {
 	Vector3 result;
 	Vector3 normal;
 
-	const GodotHeightMapExShape3D *heightmap = nullptr;
+	const EnrothPhysicsHeightMapShape3D *heightmap = nullptr;
 	GodotFaceShape3D *face = nullptr;
 };
 
@@ -95,7 +65,7 @@ _FORCE_INLINE_ bool _heightmap_cell_cull_segment(_HeightmapSegmentCullParams &p_
 }
 
 _FORCE_INLINE_ bool _heightmap_chunk_cull_segment(_HeightmapSegmentCullParams &p_params, const _HeightmapGridCullState &p_state) {
-	const GodotHeightMapExShape3D::Range &chunk = p_params.heightmap->_get_bounds_chunk(p_state.x, p_state.z);
+	const EnrothPhysicsHeightMapShape3D::Range &chunk = p_params.heightmap->_get_bounds_chunk(p_state.x, p_state.z);
 
 	Vector3 enter_pos;
 	Vector3 exit_pos;
@@ -129,21 +99,21 @@ _FORCE_INLINE_ bool _heightmap_chunk_cull_segment(_HeightmapSegmentCullParams &p
 	return p_params.heightmap->_intersect_grid_segment(_heightmap_cell_cull_segment, enter_pos, exit_pos, p_params.heightmap->width, p_params.heightmap->depth, p_params.heightmap->local_origin, p_params.result, p_params.normal);
 }
 
-}
+};
 
 
-void GodotHeightMapExShape3D::project_range(const Vector3 &p_normal, const Transform3D &p_transform, real_t &r_min, real_t &r_max) const {
+void EnrothPhysicsHeightMapShape3D::project_range(const Vector3 &p_normal, const Transform3D &p_transform, real_t &r_min, real_t &r_max) const {
 	//not very useful, but not very used either
 	p_transform.xform(get_aabb()).project_range_in_plane(Plane(p_normal), r_min, r_max);
 }
 
-Vector3 GodotHeightMapExShape3D::get_support(const Vector3 &p_normal) const {
+Vector3 EnrothPhysicsHeightMapShape3D::get_support(const Vector3 &p_normal) const {
 	//not very useful, but not very used either
 	return get_aabb().get_support(p_normal);
 }
 
 template <typename ProcessFunction>
-bool GodotHeightMapExShape3D::_intersect_grid_segment(ProcessFunction &p_process, const Vector3 &p_begin, const Vector3 &p_end, int p_width, int p_depth, const Vector3 &offset, Vector3 &r_point, Vector3 &r_normal) const {
+bool EnrothPhysicsHeightMapShape3D::_intersect_grid_segment(ProcessFunction &p_process, const Vector3 &p_begin, const Vector3 &p_end, int p_width, int p_depth, const Vector3 &offset, Vector3 &r_point, Vector3 &r_normal) const {
 	Vector3 delta = (p_end - p_begin);
 	real_t length = delta.length();
 
@@ -285,7 +255,7 @@ bool GodotHeightMapExShape3D::_intersect_grid_segment(ProcessFunction &p_process
 	return false;
 }
 
-bool GodotHeightMapExShape3D::intersect_segment(const Vector3 &p_begin, const Vector3 &p_end, Vector3 &r_point, Vector3 &r_normal, int &r_face_index, bool p_hit_back_faces) const {
+bool EnrothPhysicsHeightMapShape3D::intersect_segment(const Vector3 &p_begin, const Vector3 &p_end, Vector3 &r_point, Vector3 &r_normal, int &r_face_index, bool p_hit_back_faces) const {
 	if (heights.is_empty()) {
 		return false;
 	}
@@ -349,15 +319,15 @@ bool GodotHeightMapExShape3D::intersect_segment(const Vector3 &p_begin, const Ve
 	}
 }
 
-bool GodotHeightMapExShape3D::intersect_point(const Vector3 &p_point) const {
+bool EnrothPhysicsHeightMapShape3D::intersect_point(const Vector3 &p_point) const {
 	return false;
 }
 
-Vector3 GodotHeightMapExShape3D::get_closest_point_to(const Vector3 &p_point) const {
+Vector3 EnrothPhysicsHeightMapShape3D::get_closest_point_to(const Vector3 &p_point) const {
 	return Vector3();
 }
 
-void GodotHeightMapExShape3D::_get_cell(const Vector3 &p_point, int &r_x, int &r_y, int &r_z) const {
+void EnrothPhysicsHeightMapShape3D::_get_cell(const Vector3 &p_point, int &r_x, int &r_y, int &r_z) const {
 	const AABB &shape_aabb = get_aabb();
 
 	Vector3 pos_local = shape_aabb.position + local_origin;
@@ -372,7 +342,7 @@ void GodotHeightMapExShape3D::_get_cell(const Vector3 &p_point, int &r_x, int &r
 	r_z = (clamped_point.z < 0.0) ? (clamped_point.z - 0.5) : (clamped_point.z + 0.5);
 }
 
-void GodotHeightMapExShape3D::cull(const AABB &p_local_aabb, QueryCallback p_callback, void *p_userdata, bool p_invert_backface_collision) const {
+void EnrothPhysicsHeightMapShape3D::cull(const AABB &p_local_aabb, QueryCallback p_callback, void *p_userdata, bool p_invert_backface_collision) const {
 	if (heights.is_empty()) {
 		return;
 	}
@@ -424,7 +394,7 @@ void GodotHeightMapExShape3D::cull(const AABB &p_local_aabb, QueryCallback p_cal
 	}
 }
 
-Vector3 GodotHeightMapExShape3D::get_moment_of_inertia(real_t p_mass) const {
+Vector3 EnrothPhysicsHeightMapShape3D::get_moment_of_inertia(real_t p_mass) const {
 	// use bad AABB approximation
 	Vector3 extents = get_aabb().size * 0.5;
 
@@ -434,7 +404,7 @@ Vector3 GodotHeightMapExShape3D::get_moment_of_inertia(real_t p_mass) const {
 			(p_mass / 3.0) * (extents.x * extents.x + extents.y * extents.y));
 }
 
-void GodotHeightMapExShape3D::_build_accelerator() {
+void EnrothPhysicsHeightMapShape3D::_build_accelerator() {
 	bounds_grid.clear();
 
 	chunk_cells = static_cast<int>(Math::floor(BOUNDS_CHUNK_SIZE * inv_cell_size));
@@ -508,7 +478,7 @@ void GodotHeightMapExShape3D::_build_accelerator() {
 	}
 }
 
-void GodotHeightMapExShape3D::_setup(const Vector<real_t> &p_heights, int p_width, int p_depth, real_t p_cell_size, real_t p_min_height, real_t p_max_height) {
+void EnrothPhysicsHeightMapShape3D::_setup(const Vector<real_t> &p_heights, int p_width, int p_depth, real_t p_cell_size, real_t p_min_height, real_t p_max_height) {
 	heights = p_heights;
 	width = p_width;
 	depth = p_depth;
@@ -534,7 +504,7 @@ void GodotHeightMapExShape3D::_setup(const Vector<real_t> &p_heights, int p_widt
 	configure(aabb_new);
 }
 
-void GodotHeightMapExShape3D::set_data(const Variant &p_data) {
+void EnrothPhysicsHeightMapShape3D::set_data(const Variant &p_data) {
 	ERR_FAIL_COND(p_data.get_type() != Variant::DICTIONARY);
 
 	Dictionary d = p_data;
@@ -613,7 +583,7 @@ void GodotHeightMapExShape3D::set_data(const Variant &p_data) {
 	_setup(heights_buffer, width_new, depth_new, cell_size_new, min_height, max_height);
 }
 
-Variant GodotHeightMapExShape3D::get_data() const {
+Variant EnrothPhysicsHeightMapShape3D::get_data() const {
 	Dictionary d;
 	d["width"] = width;
 	d["depth"] = depth;
@@ -628,5 +598,5 @@ Variant GodotHeightMapExShape3D::get_data() const {
 	return d;
 }
 
-GodotHeightMapExShape3D::GodotHeightMapExShape3D() {
+EnrothPhysicsHeightMapShape3D::EnrothPhysicsHeightMapShape3D() {
 }

@@ -5,7 +5,7 @@
 #include "core/io/resource_loader.h"
 #include "scene/resources/texture.h"
 
-#include "enroth/src/Types/DBTypes.hpp"
+#include "Types/DBTypes.hpp"
 
 class EnrothModel : public Resource {
 	GDCLASS(EnrothModel, Resource)

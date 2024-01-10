@@ -280,7 +280,7 @@
 #endif // _3D_DISABLED
 
 #ifdef MODULE_ENROTH_ENABLED
-#include "modules/enroth/height_map_ex_shape_3d.h"
+#include "modules/enroth/enroth_height_map_shape_3d.h"
 #endif
 
 static Ref<ResourceFormatSaverText> resource_saver_text;

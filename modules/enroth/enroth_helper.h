@@ -2,7 +2,7 @@
 
 #include "core/io/file_access.h"
 
-#include "enroth/src/Types/DBCommon.hpp"
+#include "Types/DBCommon.hpp"
 
 class FileAccessBinarySerializer final : public enroth::data::BinarySerializer {
 private:
