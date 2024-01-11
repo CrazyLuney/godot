@@ -6,35 +6,33 @@ namespace {
 
 std::filesystem::path _get_data_path() {
 	const String path_setting{ GLOBAL_GET("enroth/general/data_path") };
-	const std::filesystem::path path{ path_setting.ascii().ptr() };
-	return path;
+	return { path_setting.ascii().ptr() };
 }
 
 } //namespace
 
 EnrothManager *EnrothManager::singleton = nullptr;
 
-void EnrothManager::_initialize() {
-	const auto data_path{ _get_data_path() };
+EnrothManager::EnrothManager() :
+		asset_loader{ _get_data_path() },
+		texture_manager{ asset_loader } {
+	CRASH_COND(singleton != nullptr);
 
-	if (is_valid()) {
-		print_line(vformat("enroth: data path is %s", data_path.generic_string().c_str()));
+	singleton = this;
 
-		sft = asset_loader.LoadSpriteFrameTable();
-		tdt = asset_loader.LoadTileDescTable();
-		ddt = asset_loader.LoadDecorationDescTable();
-	} else {
-		WARN_PRINT(vformat("enroth: invalid data path %s", data_path.generic_string().c_str()));
+	{
+		const auto& data_path = asset_loader.GetDataDir();
+
+		if (is_valid()) {
+			print_line(vformat("enroth: data path is %s", data_path.generic_string().c_str()));
+		} else {
+			WARN_PRINT(vformat("enroth: invalid data path %s", data_path.generic_string().c_str()));
+		}
 	}
 }
 
-EnrothManager::EnrothManager() :
-		asset_loader{ _get_data_path() } {
-	singleton = this;
-
-	_initialize();
-}
-
 EnrothManager::~EnrothManager() {
+	CRASH_COND(singleton == nullptr);
+
 	singleton = nullptr;
 }

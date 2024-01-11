@@ -1,21 +1,21 @@
 import os
 
-ENROTH_DIR = "enroth"
+ENROTH_DIR = os.path.join("#thirdparty", "BetterOpenEnroth")
 ENROTH_SRC_DIR = os.path.join(ENROTH_DIR, "src")
 ENROTH_LIBS = ["AssetTools", "IO", "Types", "Utility"]
 
 # TODO: builtin zlib ?
 ZLIB_DIR = os.path.join("#thirdparty", "zlib")
 
-class LibrarySourcesCollector:
+class SourceFilesCollector:
     SOURCE_SUFFIXES = [".cpp"]
     HEADER_SUFFIXES = [".h", ".hpp"]
 
-    def __init__(self, root):
+    def __init__(self, root, recursive=True):
         self.sources = []
         self.headers = []
         self.root = root
-        self.collect()
+        self.collect(recursive=recursive)
 
     def collect_accept_dir(self, node):
         self.collect_traverse(node, recursive=True)
@@ -43,6 +43,15 @@ class LibrarySourcesCollector:
         if isinstance(self.root, (str, bytes)):
             self.root = Dir(self.root)
         self.collect_traverse(self.root, recursive=recursive)
+
+    def add_source_files(self, env, objects, env_master=None):
+        env.add_source_files(objects, self.sources)
+        env_master = env_master or env
+        if env_master["vsproj"]:
+            env_master.vs_incs += [file.path for file in self.headers]
+
+def collect_and_add_source_files(env, path, objects, env_master=None, recursive=True):
+    SourceFilesCollector(path, recursive).add_source_files(env, objects, env_master)
 
 def generate_enroth_types(env, enroth_dir = ENROTH_DIR):
     print("enroth-generate-types: configure...")
@@ -79,16 +88,11 @@ if env.msvc:
     env_enroth_library.Append(CPPDEFINES=["_CRT_SECURE_NO_WARNINGS"])
 
 for lib in ENROTH_LIBS:
-    collector = LibrarySourcesCollector(os.path.join(ENROTH_SRC_DIR, lib))
-
-    env_enroth_library.add_source_files(enroth_objs, collector.sources)
-
-    # hacky
-    if env["vsproj"]:
-        env.vs_incs += [f.path for f in collector.headers]
+    collect_and_add_source_files(env_enroth_library, os.path.join(ENROTH_SRC_DIR, lib), enroth_objs, env)
 
 env.modules_sources += enroth_objs
 
+# add enroth include path
 env.Append(CPPPATH=[Dir(ENROTH_SRC_DIR)])
 
 # module
@@ -98,10 +102,11 @@ env_enroth_module = env_modules.Clone()
 
 env_enroth_module.Append(CPPPATH=[ENROTH_SRC_DIR])
 
-env_enroth_module.add_source_files(module_objs, "*.cpp")
+collect_and_add_source_files(env_enroth_module, ".", module_objs, env, recursive=False)
+collect_and_add_source_files(env_enroth_module, "utility", module_objs, env, recursive=False)
 
 if env.editor_build:
-    env_enroth_module.add_source_files(module_objs, "editor/*.cpp")
+    collect_and_add_source_files(env_enroth_module, "editor", module_objs, env, recursive=False)
 
 env.modules_sources += module_objs
 
